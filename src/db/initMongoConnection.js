@@ -33,6 +33,7 @@ export const initMongoConnection = async () => {
   // Формуємо правильний URI для підключення
   const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
 
+
   try {
     console.log('MongoDB URI:', uri); 
     await mongoose.connect(uri); 
