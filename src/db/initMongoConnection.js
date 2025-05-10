@@ -30,15 +30,16 @@ export const initMongoConnection = async () => {
     MONGODB_DB,
   } = process.env;
 
+  // Формуємо правильний URI для підключення
   const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
 
   try {
-    console.log('MongoDB URI:', uri); 
-    await mongoose.connect(uri);
+    console.log('MongoDB URI:', uri); // Лог для перевірки URI
+    await mongoose.connect(uri); // Підключення до MongoDB
     console.log('Mongo connection successfully established!');
   } catch (error) {
     console.error('Mongo connection error:', error.message);
-    process.exit(1);
+    process.exit(1); // Завершення процесу у разі помилки
   }
 };
 
