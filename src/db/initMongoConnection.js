@@ -33,7 +33,7 @@ export const initMongoConnection = async () => {
   const uri = `mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_URL}/${MONGODB_DB}?retryWrites=true&w=majority`;
 
   try {
-    console.log('MongoDB URI:', uri); // для дебагу, можна прибрати
+    console.log('MongoDB URI:', uri); 
     await mongoose.connect(uri);
     console.log('Mongo connection successfully established!');
   } catch (error) {
