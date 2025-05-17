@@ -1,61 +1,3 @@
-// import { Contact } from '../models/contact.model.js';
-
-// export const getContacts = async (req, res) => {
-//   try {
-//     const contacts = await Contact.find();
-//     res.json(contacts);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Failed to fetch contacts', error: error.message });
-//   }
-// };
-
-// export const getContact = async (req, res) => {
-//   try {
-//     const contact = await Contact.findById(req.params.contactId);
-//     if (!contact) {
-//       return res.status(404).json({ message: 'Contact not found' });
-//     }
-//     res.json(contact);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Failed to fetch contact', error: error.message });
-//   }
-// };
-
-
-
-// import { getAllContacts, getContactById } from '../services/contacts.js';
-
-// export const getStudentsController = async (req, res) => {
-//  const students = await getAllContacts();
-
-//  res.json({
-//   status: 200,
-//   message: 'Successfully found contacts!',
-//   data: students,
-//  });
-// };
-
-// export const getContactByIdController = async (req, res) => {
-//  const { contactId } = req.params;
-//  const contact = await getContactById(contactId);
-
-//  // Відповідь, якщо контакт не знайдено
-//  if (!contact) {
-//   res.status(404).json({
-//   message: 'Contacr not found'
-//   });
-//   return;
-//  }
-
-//   // Відповідь, якщо контакт знайдено
-//  res.json({
-//   status: 200,
-//   message: `Successfully found contact with id ${contactId}!`,
-//   data: contact,
-//  });
-// };
-
-
 import createHttpError from 'http-errors';
 import { getAllContacts, getContactById } from '../services/contacts.js';
 import { deleteContact } from "../services/contacts.js";
@@ -73,27 +15,25 @@ export const getContactsController = async (req, res) => {
   }
 };
 
-export const getContactByIdController = async (req, res) => {
-  try {
-    const { contactId } = req.params;
-    const contact = await getContactById(contactId);
+async function getContactByIdController(req, res) {
+  const contactId = req.params.id;
 
-    if (!contact) {
-      throw createHttpError(404, 'Student not found');
-    }
-    
+  const contact = await getContactById(contactId);
 
-    res.status(200).json({
-      message: `Successfully found contact with id ${contactId}`,
-      data: contact,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch contact', error: error.message });
+  if (contact === null) {
+    throw new createHttpError.NotFound('Contact not found');
   }
-};
+
+  res.json({ data: contact });
+}
 
 export const createContactController = async (req, res) => {
-  // Тіло функції
+  const contact = await createContactController(req, res);
+  res.status(201).json({
+    status: 201,
+    message: 'Contact created successfully',
+    data: contact,
+  });
 };
 
 export const deleteContactController = async (req, res, next) => {
@@ -145,3 +85,5 @@ export const patchContactController = async (req, res, next) => {
     data: result.contact,
   });
 };
+
+export {getContactByIdController};

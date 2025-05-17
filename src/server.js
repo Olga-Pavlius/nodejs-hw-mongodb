@@ -81,12 +81,12 @@ export const setupServer = () => {
     });
   });
 
-  app.use('/api/contacts', contactsRoutes); // краще чітко вказати базовий шлях
+  app.use('/contacts', contactsRoutes); 
 
   app.use(notFoundHandler);
   app.use(errorHandler);
 
-  return app; // ✅ ПОВЕРТАЄМО app
+  return app; 
 };
 
 
