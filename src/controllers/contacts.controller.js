@@ -2,6 +2,8 @@ import createHttpError from 'http-errors';
 import { getAllContacts, getContactById } from '../services/contacts.js';
 import { deleteContact } from "../services/contacts.js";
 import { updateContact } from '../services/contacts.js';
+import { createContact } from '../services/contacts.js';
+// import { replaceContact } from '../services/contacts.js';
 
 export const getContactsController = async (req, res) => {
   try {
@@ -25,16 +27,28 @@ async function getContactByIdController(req, res) {
   }
 
   res.json({ data: contact });
-}
+};
 
 export const createContactController = async (req, res) => {
-  const contact = await createContactController(req, res);
-  res.status(201).json({
-    status: 201,
-    message: 'Contact created successfully',
-    data: contact,
-  });
+  try {
+    // console.log('BODY:', req.body); 
+
+    const contact = await createContact(req.body);
+
+    res.status(201).json({
+      status: 201,
+      message: 'Contact created successfully',
+      data: contact,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      message: 'Something went wrong',
+      data: error.message,
+    });
+  }
 };
+
 
 export const deleteContactController = async (req, res, next) => {
   const { contactId } = req.params;
@@ -86,4 +100,5 @@ export const patchContactController = async (req, res, next) => {
   });
 };
 
-export {getContactByIdController};
+export {getContactByIdController,
+};

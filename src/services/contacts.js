@@ -1,6 +1,4 @@
 import { Contact } from '../models/contact.model.js';
-// import { contactSchema } from '../models/contact.model.js';
-
 
 export const getAllContacts = async () => {
   return await Contact.find();
@@ -8,6 +6,10 @@ export const getAllContacts = async () => {
 
 export const getContactById = async (contactId) => {
   return await Contact.findById(contactId);
+};
+
+export function createContact(payload) {
+  return Contact.create(payload);
 };
 
 export const deleteContact = async (contactId) => {
