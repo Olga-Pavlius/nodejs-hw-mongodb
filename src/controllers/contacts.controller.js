@@ -3,18 +3,28 @@ import { getAllContacts, getContactById } from '../services/contacts.js';
 import { deleteContact } from "../services/contacts.js";
 import { updateContact } from '../services/contacts.js';
 import { createContact } from '../services/contacts.js';
-// import { replaceContact } from '../services/contacts.js';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { parseSortParams } from '../utils/parseSortParams.js';
+import { parseFilterParams } from '../utils/parseFilterParams.js';
 
-export const getContactsController = async (req, res) => {
-  try {
-    const contacts = await getAllContacts();
-    res.status(200).json({
-      message: 'Successfully fetched contacts!',
-      data: contacts,
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch contacts', error: error.message });
-  }
+async function getContactsController(req, res) {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
+
+  const contacts = await getAllContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filter,
+  });
+
+   res.status(200).json({
+    status: 200,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
 };
 
 async function getContactByIdController(req, res) {
@@ -31,8 +41,6 @@ async function getContactByIdController(req, res) {
 
 export const createContactController = async (req, res) => {
   try {
-    // console.log('BODY:', req.body); 
-
     const contact = await createContact(req.body);
 
     res.status(201).json({
@@ -48,7 +56,6 @@ export const createContactController = async (req, res) => {
     });
   }
 };
-
 
 export const deleteContactController = async (req, res, next) => {
   const { contactId } = req.params;
@@ -78,7 +85,7 @@ export const upsertContactController = async (req, res, next) => {
   const status = result.isNew ? 201 : 200;
 
   res.status(status).json({
-    status,
+    status: 200,
     message: `Successfully upserted a contact!`,
     data: result.contact,
   });
@@ -101,4 +108,6 @@ export const patchContactController = async (req, res, next) => {
 };
 
 export {getContactByIdController,
+       getContactsController
 };
+

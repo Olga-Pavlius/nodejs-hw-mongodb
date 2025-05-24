@@ -1,17 +1,18 @@
 import { Contact } from '../models/contact.model.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { SORT_ORDER } from '../constants/index.js';
 
-export const getAllContacts = async () => {
-  return await Contact.find();
-};
-
+// Отримати контакт за ID
 export const getContactById = async (contactId) => {
   return await Contact.findById(contactId);
 };
 
+// Створити новий контакт
 export function createContact(payload) {
   return Contact.create(payload);
 };
 
+// Видалити контакт
 export const deleteContact = async (contactId) => {
   const contact = await Contact.findOneAndDelete({
     _id: contactId,
@@ -20,6 +21,7 @@ export const deleteContact = async (contactId) => {
   return contact;
 };
 
+// Оновити контакт
 export const updateContact = async (contactId, payload, options = {}) => {
   const rawResult = await Contact.findOneAndUpdate(
     { _id: contactId },
@@ -36,5 +38,42 @@ export const updateContact = async (contactId, payload, options = {}) => {
   return {
     contact: rawResult.value,
     isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+  };
+};
+
+export const getAllContacts = async ({
+  page = 1,
+  perPage = 10,
+  sortOrder = SORT_ORDER.ASC,
+  sortBy = '_id',
+  type,
+  isFavourite,
+}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+
+  const filter = {};
+
+  if (type) {
+    filter.contactType = type;
+  }
+
+  if (isFavourite !== undefined) {
+    filter.isFavourite = isFavourite === 'true';
+  }
+
+  const [contactsCount, contacts] = await Promise.all([
+    Contact.countDocuments(filter),
+    Contact.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder }),
+  ]);
+
+  const paginationData = calculatePaginationData(contactsCount, perPage, page);
+
+  return {
+    data: contacts,
+    ...paginationData,
   };
 };
