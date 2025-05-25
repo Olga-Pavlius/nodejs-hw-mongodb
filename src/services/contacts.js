@@ -1,10 +1,31 @@
 import { Contact } from '../models/contact.model.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER } from '../constants/index.js';
+import mongoose from 'mongoose';
 
 // Отримати контакт за ID
-export const getContactById = async (contactId) => {
-  return await Contact.findById(contactId);
+// export const getContactById = async (contactId) => {
+//   return await Contact.findById(contactId);
+// };
+
+export const getContactById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
+    const contact = await Contact.findById(id);
+
+    if (!contact) {
+      return res.status(404).json({ message: 'Contact not found' });
+    }
+
+    res.status(200).json(contact);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Створити новий контакт

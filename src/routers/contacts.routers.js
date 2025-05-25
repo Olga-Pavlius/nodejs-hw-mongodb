@@ -14,6 +14,7 @@ import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
 import { updateContactSchema } from '../validation/contacts.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { validateObjectId } from '../middlewares/validateObjectId.js';
 
 const router = express.Router();
 
@@ -28,19 +29,19 @@ router.post(
 );
 
 router.put(
-  '/:contactId',
+  '/:contactId', validateObjectId,
   validateBody(createContactSchema),
   ctrlWrapper(upsertContactController),
 );
 
 router.patch(
-  '/:contactId',
+  '/:contactId', validateObjectId,
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );
 
 router.get(
-  '/:contactId',
+  '/:contactId', validateObjectId,
   isValidId,
   ctrlWrapper(getContactByIdController),
 );
