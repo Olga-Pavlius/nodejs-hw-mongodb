@@ -1,19 +1,20 @@
 import Joi from 'joi';
 
 export const createContactSchema = Joi.object({
-  name: Joi.string().required(),
+  name: Joi.string().min(2).max(100).required(),
   email: Joi.string().email().required(),
-  phoneNumber: Joi.string().required(),
+  phoneNumber: Joi.string().min(5).max(20).required(),
   isFavourite: Joi.boolean().optional(),
   gender: Joi.string().valid('male', 'female').optional(),
-  year: Joi.number().integer().optional(),
+  year: Joi.number().min(1900).max(2100).optional(),
 });
 
 export const updateContactSchema = Joi.object({
-  name: Joi.string(),
+  name: Joi.string().min(2).max(100),
   email: Joi.string().email(),
-  phoneNumber: Joi.string(),
-  isFavourite: Joi.boolean(), // додано
+  phoneNumber: Joi.string().min(5).max(20),
+  isFavourite: Joi.boolean(), 
   gender: Joi.string().valid('male', 'female'),
-  year: Joi.number().integer(),
-}).min(1);
+  year: Joi.number().min(1900).max(2100),
+}).min(1); 
+

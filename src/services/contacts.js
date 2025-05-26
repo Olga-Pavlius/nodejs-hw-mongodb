@@ -1,12 +1,6 @@
 import { Contact } from '../models/contact.model.js';
 
-export async function getAllContacts({
-  page,
-  perPage,
-  sortBy,
-  sortOrder,
-  filter,
-}) {
+export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter }) {
   const skip = page > 0 ? (page - 1) * perPage : 0;
 
   const contactQuery = Contact.find();
@@ -14,32 +8,30 @@ export async function getAllContacts({
   if (typeof filter.gender !== 'undefined') {
     contactQuery.where('gender').equals(filter.gender);
   }
-
   if (typeof filter.minYear !== 'undefined') {
     contactQuery.where('year').gte(filter.minYear);
   }
-
   if (typeof filter.maxYear !== 'undefined') {
     contactQuery.where('year').lte(filter.maxYear);
   }
 
-  const [total, contacts] = await Promise.all([
-    Contact.countDocuments(contactQuery),
+  const [totalItems, data] = await Promise.all([
+    Contact.countDocuments(contactQuery.getFilter()), // важливо — рахувати за тим самим фільтром
     contactQuery
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
       .limit(perPage),
   ]);
 
-  const totalPages = Math.ceil(total / perPage);
+  const totalPages = Math.ceil(totalItems / perPage);
 
   return {
-    contacts,
-    total,
+    data,
+    totalItems,
     page,
     perPage,
     totalPages,
-    hasNextPage: totalPages > page,
+    hasNextPage: page < totalPages,
     hasPreviousPage: page > 1,
   };
 }
@@ -60,15 +52,15 @@ export function updateContact(contactId, payload) {
   return Contact.findByIdAndUpdate(contactId, payload, { new: true });
 }
 
-export async function replaceContact(contactId, contact) {
-  const result = await Contact.findByIdAndUpdate(contactId, contact, {
-    new: true,
-    upsert: true,
-    includeResultMetadata: true,
-  });
+export async function replaceContact(contactId, payload) {
+  const result = await Contact.findOneAndUpdate(
+    { _id: contactId },
+    payload,
+    { new: true, upsert: true, rawResult: true }
+  );
 
   return {
-    contact: result?.value || result,
-    isNew: Boolean(result?.lastErrorObject?.upserted),
+    contact: result.value,
+    isNew: !!result.lastErrorObject?.upserted,
   };
 }

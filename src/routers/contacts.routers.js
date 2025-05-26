@@ -3,10 +3,10 @@ import express from 'express';
 import {
   getContactsController,
   getContactByIdController,
-  createContactController,
   deleteContactController,
-  upsertContactController,
-  patchContactController,
+  createContactController,
+  patchContactController,      
+  upsertContactController,     
 } from '../controllers/contacts.controller.js';
 
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
@@ -51,4 +51,3 @@ router.put(
 router.delete('/:contactId', validateObjectId, ctrlWrapper(deleteContactController));
 
 export default router;
-

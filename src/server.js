@@ -35,7 +35,7 @@ export const setupServer = () => {
 
   app.use(notFoundHandler);
   app.use(errorHandler);
-  app.use(express.json());
+
 
   return app; 
 };
