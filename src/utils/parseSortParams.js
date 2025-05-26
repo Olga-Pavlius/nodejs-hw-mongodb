@@ -1,21 +1,37 @@
-import { SORT_ORDER } from '../constants/index.js';
+function parseSortBy(value) {
+  if (typeof value === 'undefined') {
+    return '_id';
+  }
 
-const parseSortOrder = (sortOrder) => {
-  return [SORT_ORDER.ASC, SORT_ORDER.DESC].includes(sortOrder)
-    ? sortOrder
-    : SORT_ORDER.ASC;
-};
+  const keys = ['_id', 'name', 'email', 'phoneNumber', 'contactType', 'isFavourite', 'createdAt', 'updatedAt'];
 
-const parseSortBy = (sortBy) => {
-  const allowedFields = ['_id', 'name', 'email', 'phoneNumber', 'contactType', 'isFavourite', 'createdAt', 'updatedAt'];
-  return allowedFields.includes(sortBy) ? sortBy : '_id';
-};
+  if (keys.includes(value) !== true) {
+    return '_id';
+  }
 
-export const parseSortParams = (query) => {
-  const { sortOrder, sortBy } = query;
+  return value;
+}
+
+function parseSortOrder(value) {
+  if (typeof value === 'undefined') {
+    return 'asc';
+  }
+
+  if (value !== 'asc' && value !== 'desc') {
+    return 'asc';
+  }
+
+  return value;
+}
+
+export function parseSortParams(query) {
+  const { sortBy, sortOrder } = query;
+
+  const parsedSortBy = parseSortBy(sortBy);
+  const parsedSortOrder = parseSortOrder(sortOrder);
+
   return {
-    sortOrder: parseSortOrder(sortOrder),
-    sortBy: parseSortBy(sortBy),
+    sortBy: parsedSortBy,
+    sortOrder: parsedSortOrder,
   };
-};
-
+}

@@ -7,11 +7,12 @@ const contactSchema = new mongoose.Schema(
       required: [true, 'Поле "name" є обов’язковим'],
       trim: true,
     },
-    phoneNumber: {
-      type: String,
-      required: [true, 'Поле "phoneNumber" є обов’язковим'],
-      trim: true,
-    },
+    // phoneNumber: {
+    //   type: String,
+    //   required: [true, 'Поле "phoneNumber" є обов’язковим'],
+    //   trim: true,
+    // },
+    phoneNumber: { type: String, required: true },
     email: {
       type: String,
       trim: true,
