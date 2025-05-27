@@ -196,7 +196,7 @@ async function getContactsController(req, res, next) {
       status: 200,
       message: 'Successfully found contacts!',
       data: {
-        data,
+        contacts: data,
         page,
         perPage,
         totalItems,
@@ -210,6 +210,21 @@ async function getContactsController(req, res, next) {
   }
 }
 
+// async function getContactByIdController(req, res, next) {
+//   try {
+//     const contactId = req.params.contactId;
+//     const contact = await getContactById(contactId);
+
+//     if (!contact) {
+//       throw new createHttpError.NotFound('Contact not found');
+//     }
+
+//     res.json({ data: contact });
+//   } catch (error) {
+//     next(error);
+//   }
+// }
+
 async function getContactByIdController(req, res, next) {
   try {
     const contactId = req.params.contactId;
@@ -219,7 +234,13 @@ async function getContactByIdController(req, res, next) {
       throw new createHttpError.NotFound('Contact not found');
     }
 
-    res.json({ data: contact });
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully found contact!',
+      data: {
+        contact,
+      },
+    });
   } catch (error) {
     next(error);
   }
