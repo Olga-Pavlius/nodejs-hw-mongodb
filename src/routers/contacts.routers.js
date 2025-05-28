@@ -23,23 +23,19 @@ const jsonParser = express.json();
 
 router.get('/', ctrlWrapper(getContactsController));
 
-router.get('/:contactId', validateObjectId, ctrlWrapper(getContactByIdController));
+router.get('/:contactId', validateObjectId,
+   ctrlWrapper(getContactByIdController));
 
-router.post(
-  '/',
-  jsonParser,
-  validateBody(createContactSchema),
-  ctrlWrapper(createContactController),
-);
+router.post('/', jsonParser, 
+  validateBody(createContactSchema), 
+  ctrlWrapper(createContactController));
 
-router.patch(
-  '/:contactId',
-  validateObjectId,
-  jsonParser,
-  validateBody(updateContactSchema),
-  ctrlWrapper(patchContactController),
-);
-
+router.patch('/:contactId', 
+  validateObjectId, 
+  jsonParser, 
+  validateBody(updateContactSchema), 
+  ctrlWrapper(patchContactController));
+  
 router.put(
   '/:contactId',
   validateObjectId,
