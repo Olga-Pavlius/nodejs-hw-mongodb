@@ -36,7 +36,7 @@ async function getContactsController(req, res, next) {
       status: 200,
       message: 'Successfully found contacts!',
       data: {
-        contacts: data,
+        data: data,
         page,
         perPage,
         totalItems,
@@ -58,10 +58,9 @@ async function getContactByIdController(req, res, next) {
     if (!contact) {
       throw new createHttpError.NotFound('Contact not found');
     }
-
-    res.json({
-      status: 'success',
-      message: 'Contact retrieved successfully',
+    res.status(200).json({
+      status: 200,
+      message: 'Contact fetched successfully',
       data: contact,
     });
   } catch (error) {
@@ -89,7 +88,7 @@ async function createContactController(req, res, next) {
     const newContact = await createContact(req.body);
 
     res.status(201).json({
-      status: 'success',
+      status: 201,
       message: 'Contact created successfully',
       data: newContact,
     });
@@ -106,8 +105,7 @@ async function updateContactController(req, res, next) {
     if (!result) {
       throw new createHttpError.NotFound('Contact not found');
     }
-
-    res.json({
+     res.status(200).json({
       status: 200,
       message: 'Contact updated successfully',
       data: result,
