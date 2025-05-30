@@ -148,7 +148,7 @@ async function patchContactController(req, res, next) {
     }
 
     res.json({
-      status: 'success',
+      status: 200,
       message: 'Contact updated successfully',
       data: updatedContact,
     });
