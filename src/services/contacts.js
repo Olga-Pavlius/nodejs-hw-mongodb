@@ -1,9 +1,9 @@
 import { Contact } from '../models/contact.model.js';
 
-export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter }) {
+export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter, userId }) {
   const skip = page > 0 ? (page - 1) * perPage : 0;
 
-  const contactQuery = Contact.find();
+  const contactQuery = Contact.find({ userId });
 
   if (typeof filter.gender !== 'undefined') {
     contactQuery.where('gender').equals(filter.gender);
@@ -16,7 +16,7 @@ export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter 
   }
 
   const [totalItems, data] = await Promise.all([
-    Contact.countDocuments(contactQuery.getFilter()), // важливо — рахувати за тим самим фільтром
+    Contact.countDocuments(contactQuery.getFilter()),
     contactQuery
       .sort({ [sortBy]: sortOrder })
       .skip(skip)
@@ -36,27 +36,44 @@ export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter 
   };
 }
 
-export function getContactById(contactId) {
-  return Contact.findById(contactId);
+export function getContactById(contactId, userId) {
+  return Contact.findOne({ _id: contactId, userId });
 }
 
-export function deleteContact(contactId) {
-  return Contact.findByIdAndDelete(contactId);
+export function deleteContact(contactId, userId) {
+  return Contact.findOneAndDelete({ _id: contactId, userId });
 }
 
 export function createContact(payload) {
   return Contact.create(payload);
 }
 
-export function updateContact(contactId, payload) {
-  return Contact.findByIdAndUpdate(contactId, payload, { new: true });
+export function updateContact(contactId, payload, userId, options = {}) {
+  return Contact.findOneAndUpdate(
+    { _id: contactId, userId },
+    payload,
+    { new: true, ...options }
+  );
 }
 
-export async function replaceContact(contactId, payload) {
+export async function replaceContact(contactId, payload, userId) {
   const result = await Contact.findOneAndUpdate(
-    { _id: contactId },
+    { _id: contactId, userId },
     payload,
     { new: true, upsert: true, rawResult: true }
+  );
+
+  return {
+    contact: result.value,
+    isNew: !!result.lastErrorObject?.upserted,
+  };
+}
+
+export async function upsertContact(contactId, payload, userId) {
+  const result = await Contact.findOneAndUpdate(
+    { _id: contactId, userId },
+    payload,
+    { new: true, upsert: true, setDefaultsOnInsert: true, rawResult: true }
   );
 
   return {
