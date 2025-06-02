@@ -1,83 +1,89 @@
 import { Contact } from '../models/contact.model.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { SORT_ORDER } from '../constants/index.js';
 
-export async function getAllContacts({ page, perPage, sortBy, sortOrder, filter, userId }) {
-  const skip = page > 0 ? (page - 1) * perPage : 0;
+export const getAllContacts = async ({
+  page = 1,
+  perPage = 10,
+  sortOrder = SORT_ORDER.ASC,
+  sortBy = '_id',
+  filter = {},
+  ownerId,
+}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
 
-  const contactQuery = Contact.find({ userId });
+  const contactsQuery = Contact.find(ownerId);
 
-  if (typeof filter.gender !== 'undefined') {
-    contactQuery.where('gender').equals(filter.gender);
+  if (filter.isFavourite) {
+    contactsQuery.where('isFavourite').equals(filter.isFavourite);
   }
-  if (typeof filter.minYear !== 'undefined') {
-    contactQuery.where('year').gte(filter.minYear);
-  }
-  if (typeof filter.maxYear !== 'undefined') {
-    contactQuery.where('year').lte(filter.maxYear);
+
+  if (filter.contactType) {
+    contactsQuery.where('contactType').equals(filter.contactType);
   }
 
-  const [totalItems, data] = await Promise.all([
-    Contact.countDocuments(contactQuery.getFilter()),
-    contactQuery
-      .sort({ [sortBy]: sortOrder })
+  const [contactsCount, contacts] = await Promise.all([
+    Contact.find().merge(contactsQuery).countDocuments(),
+    contactsQuery
       .skip(skip)
-      .limit(perPage),
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .exec(),
   ]);
 
-  const totalPages = Math.ceil(totalItems / perPage);
+  const paginationData = calculatePaginationData(contactsCount, perPage, page);
 
   return {
+    data: contacts,
+    ...paginationData,
+  };
+};
+
+export const getContactById = async (contactId) => {
+  const contact = await Contact.findById(contactId);
+  return contact;
+};
+
+export const createContact = async (payload) => {
+  const contact = await Contact.create(payload);
+  return contact;
+};
+
+export const updateContact = async (contactId, payload, options = {}) => {
+  const result = await Contact.findOneAndUpdate(
+    {
+      _id: contactId,
+    },
+    payload,
+    { new: true, includeResultMetadata: true, ...options },
+  );
+
+  if (!result || !result.value) return null;
+
+  return {
+    contact: result.value,
+    isNew: Boolean(result?.lastErrorObject.upserted),
+  };
+};
+
+export const deleteContact = async (contactId) => {
+  const contact = await Contact.findOneAndDelete({
+    _id: contactId,
+  });
+
+  return contact;
+};
+
+export async function replaceContact(contactId, data) {
+  return await Contact.findOneAndReplace({ _id: contactId }, data, { new: true });
+};
+
+export async function upsertContact(contactId, data) {
+  return await Contact.findOneAndUpdate(
+    { _id: contactId },
     data,
-    totalItems,
-    page,
-    perPage,
-    totalPages,
-    hasNextPage: page < totalPages,
-    hasPreviousPage: page > 1,
-  };
-}
-
-export function getContactById(contactId, userId) {
-  return Contact.findOne({ _id: contactId, userId });
-}
-
-export function deleteContact(contactId, userId) {
-  return Contact.findOneAndDelete({ _id: contactId, userId });
-}
-
-export function createContact(payload) {
-  return Contact.create(payload);
-}
-
-export function updateContact(contactId, payload, userId, options = {}) {
-  return Contact.findOneAndUpdate(
-    { _id: contactId, userId },
-    payload,
-    { new: true, ...options }
+    { upsert: true, new: true }
   );
-}
+};
 
-export async function replaceContact(contactId, payload, userId) {
-  const result = await Contact.findOneAndUpdate(
-    { _id: contactId, userId },
-    payload,
-    { new: true, upsert: true, rawResult: true }
-  );
-
-  return {
-    contact: result.value,
-    isNew: !!result.lastErrorObject?.upserted,
-  };
-}
-
-export async function upsertContact(contactId, payload, userId) {
-  const result = await Contact.findOneAndUpdate(
-    { _id: contactId, userId },
-    payload,
-    { new: true, upsert: true, setDefaultsOnInsert: true, rawResult: true }
-  );
-
-  return {
-    contact: result.value,
-    isNew: !!result.lastErrorObject?.upserted,
-  };
-}
