@@ -1,188 +1,107 @@
 import createHttpError from 'http-errors';
+
 import {
-  getAllContacts,
+  getContacts,
   getContactById,
   deleteContact,
   createContact,
   updateContact,
   replaceContact,
-  upsertContact,
 } from '../services/contacts.js';
 
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 
-async function getContactsController(req, res, next) {
-  try {
-    const { page, perPage } = parsePaginationParams(req.query);
-    const { sortBy, sortOrder } = parseSortParams(req.query);
-    const filter = parseFilterParams(req.query);
-    const userId = req.user._id;
+async function getContactsController(req, res) {
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = parseSortParams(req.query);
+  const filter = parseFilterParams(req.query);
 
-    const {
-      data,
-      totalItems,
-      totalPages,
-      hasPreviousPage,
-      hasNextPage,
-    } = await getAllContacts({
-      page,
-      perPage,
-      sortBy,
-      sortOrder,
-      filter,
-      userId,
-    });
+  const contacts = await getContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+    filter,
+    ownerId: req.user.id,
+  });
 
-    res.json({
-      status: 200,
-      message: 'Successfully found contacts!',
-      data: {
-        contacts: data,
-        page,
-        perPage,
-        totalItems,
-        totalPages,
-        hasPreviousPage,
-        hasNextPage,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.json({ data: contacts });
 }
 
-async function getContactByIdController(req, res, next) {
-  try {
-    const userId = req.user._id;
-    const contactId = req.params.contactId;
-    const contact = await getContactById(contactId, userId);
+async function getContactByIdController(req, res) {
+  const contactId = req.params.id;
 
-    if (!contact) {
-      throw new createHttpError.NotFound('Contact not found');
-    }
+  const contact = await getContactById(contactId);
 
-    res.json({
-      status: 200,
-      message: 'Contact retrieved successfully',
-      data: contact,
-    });
-  } catch (error) {
-    next(error);
+  if (contact === null) {
+    throw new createHttpError.NotFound('Contact not found');
   }
+
+  if (contact.ownerId.toString() !== req.user.id.toString()) {
+    throw new createHttpError.NotFound('Contact not found');
+  }
+
+  res.json({ data: contact });
 }
 
-async function deleteContactController(req, res, next) {
-  try {
-    const { contactId } = req.params;
-    const userId = req.user._id;
-    const result = await deleteContact(contactId, userId);
+async function deleteContactController(req, res) {
+  const contactId = req.params.id;
 
-    if (!result) {
-      throw new createHttpError.NotFound('Contact not found');
-    }
+  const result = await deleteContact(contactId);
 
-    res.status(204).end();
-  } catch (error) {
-    next(error);
+  if (result === null) {
+    throw new createHttpError.NotFound('Contact not found');
   }
+
+  res.status(204).end();
 }
 
-async function createContactController(req, res, next) {
-  try {
-    const userId = req.user._id;
-    const newContact = await createContact({ ...req.body, userId });
+async function createContactController(req, res) {
+  const contact = await createContact({ ...req.body, ownerId: req.user.id });
 
-    res.status(201).json({
-      status: 201,
-      message: 'Contact created successfully',
-      data: newContact,
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(201).json({
+    status: 201,
+    message: 'Contact created successfully',
+    data: contact,
+  });
 }
 
-async function updateContactController(req, res, next) {
-  try {
-    const { contactId } = req.params;
-    const userId = req.user._id;
-    const updatedContact = await updateContact(contactId, req.body, userId);
+async function updateContactController(req, res) {
+  const contactId = req.params.id;
 
-    if (!updatedContact) {
-      throw new createHttpError.NotFound('Contact not found');
-    }
+  const result = await updateContact(contactId, req.body);
 
-    res.json({
+  if (result === null) {
+    throw new createHttpError.NotFound('Contact not found');
+  }
+
+  res.json({
+    status: 200,
+    message: 'Contact updated successfully',
+    data: result,
+  });
+}
+
+async function replaceContactController(req, res) {
+  const contactId = req.params.id;
+
+  const { value, updatedExisting } = await replaceContact(contactId, req.body);
+
+  if (updatedExisting === true) {
+    return res.json({
       status: 200,
       message: 'Contact updated successfully',
-      data: updatedContact,
+      data: value,
     });
-  } catch (error) {
-    next(error);
   }
-}
 
-async function replaceContactController(req, res, next) {
-  try {
-    const { contactId } = req.params;
-    const userId = req.user._id;
-    const { contact, isNew } = await replaceContact(contactId, req.body, userId);
-
-    if (isNew) {
-      return res.status(201).json({
-        status: 201,
-        message: 'Contact created successfully',
-        data: contact,
-      });
-    }
-
-    res.json({
-      status: 200,
-      message: 'Contact updated successfully',
-      data: contact,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function patchContactController(req, res, next) {
-  try {
-    const { contactId } = req.params;
-    const userId = req.user._id;
-    const updatedContact = await updateContact(contactId, req.body, userId);
-
-    if (!updatedContact) {
-      throw new createHttpError.NotFound('Contact not found');
-    }
-
-    res.json({
-      status: 'success',
-      message: 'Contact updated successfully',
-      data: updatedContact,
-    });
-  } catch (error) {
-    next(error);
-  }
-}
-
-async function upsertContactController(req, res, next) {
-  try {
-    const { contactId } = req.params;
-    const userId = req.user._id;
-
-    const { contact, isNew } = await upsertContact(contactId, req.body, userId);
-
-    res.status(isNew ? 201 : 200).json({
-      status: isNew ? 201 : 200,
-      message: 'Successfully upserted a contact!',
-      data: contact,
-    });
-  } catch (error) {
-    next(error);
-  }
+  res.status(201).json({
+    status: 201,
+    message: 'Contact created successfully',
+    data: value,
+  });
 }
 
 export {
@@ -192,6 +111,4 @@ export {
   createContactController,
   updateContactController,
   replaceContactController,
-  patchContactController,
-  upsertContactController,
 };

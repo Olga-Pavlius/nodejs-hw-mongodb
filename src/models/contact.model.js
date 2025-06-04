@@ -7,11 +7,6 @@ const contactSchema = new mongoose.Schema(
       required: [true, 'Поле "name" є обов’язковим'],
       trim: true,
     },
-    // phoneNumber: {
-    //   type: String,
-    //   required: [true, 'Поле "phoneNumber" є обов’язковим'],
-    //   trim: true,
-    // },
     phoneNumber: { type: String, required: true },
     email: {
       type: String,
@@ -34,6 +29,11 @@ const contactSchema = new mongoose.Schema(
       default: 'personal',
       required: [true, 'Поле "contactType" є обов’язковим'],
     },
+    userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   },
   { timestamps: true }
 );
