@@ -12,11 +12,14 @@ import {
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { isValidID } from '../middlewares/isValidId.js';
 import { validateBody } from '../middlewares/validateBody.js';
+import { auth } from '../middlewares/auth.js'; 
 
 import { contactSchema, updateContactSchema } from '../validation/contacts.js';
 
 const router = express.Router();
 const jsonParser = express.json();
+
+router.use(auth);
 
 router.get('/', ctrlWrapper(getContactsController));
 
