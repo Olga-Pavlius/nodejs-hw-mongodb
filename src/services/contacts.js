@@ -66,8 +66,16 @@ export const deleteContact = async (contactId, userId) => {
   return await Contact.findOneAndDelete({ _id: contactId, userId });
 };
 
-export async function replaceContact(contactId, data, userId) {
-  return await Contact.findOneAndReplace({ _id: contactId, userId }, data, { new: true });
+// export async function replaceContact(contactId, data, userId) {
+//   return await Contact.findOneAndReplace({ _id: contactId, userId }, data, { new: true });
+// };
+
+export const replaceContact = async (contactId, data) => {
+  return Contact.findOneAndReplace(
+    { _id: contactId, userId: data.userId },
+    data,
+    { new: true, runValidators: true }
+  );
 };
 
 export async function upsertContact(contactId, data, userId) {

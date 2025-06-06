@@ -1,5 +1,4 @@
 import createHttpError from 'http-errors';
-
 import {
   getContacts,
   getContactById,
@@ -12,23 +11,7 @@ import {
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
-
-// async function getContactsController(req, res) {
-//   const { page, perPage } = parsePaginationParams(req.query);
-//   const { sortBy, sortOrder } = parseSortParams(req.query);
-//   const filter = parseFilterParams(req.query);
-
-//   const contacts = await getContacts({
-//     page,
-//     perPage,
-//     sortBy,
-//     sortOrder,
-//     filter,
-//     ownerId: req.user.id,
-//   });
-
-//   res.json({ data: contacts });
-// }
+import { refreshSession } from '../services/auth.service.js';
 
 async function getContactsController(req, res) {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -41,86 +24,123 @@ async function getContactsController(req, res) {
     sortBy,
     sortOrder,
     filter,
-    ownerId: req.user.id,
+    userId: req.user.id,
   });
-  console.log('userId from req.user:', req.user);
-  console.log(contacts);
-  res.json({ data: contacts });
+
+  res.status(200).json({
+    status: 200,
+    message: 'Contacts retrieved successfully',
+    data: contacts,
+  });
 }
 
 async function getContactByIdController(req, res) {
   const contactId = req.params.id;
 
-  const contact = await getContactById(contactId);
+  const contact = await getContactById(contactId, req.user.id);
 
-  if (contact === null) {
+  if (!contact) {
     throw new createHttpError.NotFound('Contact not found');
   }
 
-  if (contact.ownerId.toString() !== req.user.id.toString()) {
-    throw new createHttpError.NotFound('Contact not found');
-  }
-
-  res.json({ data: contact });
+  res.status(200).json({
+    status: 200,
+    message: 'Contact retrieved successfully',
+    data: contact,
+  });
 }
 
 async function deleteContactController(req, res) {
   const contactId = req.params.id;
 
-  const result = await deleteContact(contactId);
+  const result = await deleteContact(contactId, req.user.id);
 
-  if (result === null) {
+  if (!result) {
     throw new createHttpError.NotFound('Contact not found');
   }
 
   res.status(204).end();
 }
 
-async function createContactController(req, res) {
-  const contact = await createContact({ ...req.body, ownerId: req.user.id });
+async function createContactController(req, res, next) {
+  try {
+    const contact = await createContact({ ...req.body, userId: req.user.id });
 
-  res.status(201).json({
-    status: 201,
-    message: 'Contact created successfully',
-    data: contact,
-  });
+    res.status(201).json({
+      status: 201,
+      message: 'Contact created successfully',
+      data: contact,
+    });
+  } catch (error) {
+    console.error('Create contact error:', error);
+    next(error);
+  }
 }
 
 async function updateContactController(req, res) {
   const contactId = req.params.id;
 
-  const result = await updateContact(contactId, req.body);
+  const updated = await updateContact(contactId, req.body, req.user.id);
 
-  if (result === null) {
+  if (!updated) {
     throw new createHttpError.NotFound('Contact not found');
   }
 
-  res.json({
+  res.status(200).json({
     status: 200,
     message: 'Contact updated successfully',
-    data: result,
+    data: updated,
   });
 }
 
-async function replaceContactController(req, res) {
-  const contactId = req.params.id;
+export const replaceContactController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-  const { value, updatedExisting } = await replaceContact(contactId, req.body);
-
-  if (updatedExisting === true) {
-    return res.json({
-      status: 200,
-      message: 'Contact updated successfully',
-      data: value,
+    const updatedContact = await replaceContact(id, {
+      ...req.body,
+      userId: req.user.id,
     });
-  }
 
-  res.status(201).json({
-    status: 201,
-    message: 'Contact created successfully',
-    data: value,
-  });
-}
+    if (!updatedContact) {
+      throw new createHttpError.NotFound('Contact not found');
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Contact replaced successfully',
+      data: updatedContact,
+    });
+  } catch (error) {
+    console.error('Replace contact error:', error);
+    next(error);
+  }
+};
+
+export const refreshController = async (req, res, next) => {
+  try {
+    console.log('🔁 Cookies:', req.cookies);
+
+    const oldRefreshToken = req.cookies.refreshToken;
+    const sessionId = req.cookies.sessionId;
+
+    const { accessToken, refreshToken, session } = await refreshSession(oldRefreshToken, sessionId);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      expires: session.refreshTokenValidUntil,
+    });
+
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully refreshed a session!',
+      data: { accessToken },
+    });
+  } catch (err) {
+    console.error('🔴 Refresh error:', err);
+    next(err);
+  }
+};
 
 export {
   getContactsController,
@@ -128,5 +148,4 @@ export {
   deleteContactController,
   createContactController,
   updateContactController,
-  replaceContactController,
 };
