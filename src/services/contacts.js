@@ -7,12 +7,12 @@ export const getContacts = async ({
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
   filter = {},
-  ownerId, // ← важливо
+  userId, // ← важливо
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
 
-  const contactsQuery = Contact.find({ userId: ownerId });
+  const contactsQuery = Contact.find({ userId: userId });
 
   if (filter.isFavourite !== undefined) {
     contactsQuery.where('isFavourite').equals(filter.isFavourite);
@@ -31,6 +31,8 @@ export const getContacts = async ({
   const hasPreviousPage = page > 1;
   const hasNextPage = page < totalPages;
 
+  console.log('Found contacts:', contacts);
+
   return {
     data: contacts,
     total: contactsCount,
@@ -47,6 +49,7 @@ export const getContactById = async (contactId, userId) => {
 };
 
 export const createContact = async (payload) => {
+   console.log('Saving contact:', payload); 
   return await Contact.create(payload);
 };
 

@@ -42,8 +42,18 @@ export async function loginUser(email, password) {
   });
 }
 
+// export async function logoutUser(sessionId) {
+//   await Session.deleteOne({ _id: sessionId });
+// }
+
 export async function logoutUser(sessionId) {
-  await Session.deleteOne({ _id: sessionId });
+  const session = await Session.findByIdAndDelete(sessionId);
+
+  if (!session) {
+    throw new createHttpError.Unauthorized('Session not found');
+  }
+
+  return session;
 }
 
 export async function refreshSession(sessionId, refreshToken) {
