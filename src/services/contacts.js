@@ -7,7 +7,7 @@ export const getContacts = async ({
   sortOrder = SORT_ORDER.ASC,
   sortBy = '_id',
   filter = {},
-  userId, // ← важливо
+  userId, 
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
@@ -65,10 +65,6 @@ export const updateContact = async (contactId, payload, userId, options = {}) =>
 export const deleteContact = async (contactId, userId) => {
   return await Contact.findOneAndDelete({ _id: contactId, userId });
 };
-
-// export async function replaceContact(contactId, data, userId) {
-//   return await Contact.findOneAndReplace({ _id: contactId, userId }, data, { new: true });
-// };
 
 export const replaceContact = async (contactId, data) => {
   return Contact.findOneAndReplace(
