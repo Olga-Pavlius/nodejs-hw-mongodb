@@ -1,3 +1,4 @@
+import createHttpError from 'http-errors';
 import {
   registerUser,
   loginUser,
@@ -18,24 +19,6 @@ export const registerController = async (req, res, next) => {
   }
 };
 
-// export const loginController = async (req, res, next) => {
-//   try {
-//     const { accessToken, refreshToken, session } = await loginUser(req.body);
-
-//     res.cookie('refreshToken', refreshToken, {
-//       httpOnly: true,
-//       expires: session.refreshTokenValidUntil,
-//     });
-
-//     res.status(200).json({
-//       status: 200,
-//       message: 'Successfully logged in an user!',
-//       data: { accessToken },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 export const loginController = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -64,26 +47,6 @@ export const loginController = async (req, res, next) => {
     next(err);
   }
 };
-
-// export const refreshController = async (req, res, next) => {
-//   try {
-//     const oldRefreshToken = req.cookies.refreshToken;
-//     const { accessToken, refreshToken, session } = await refreshSession(oldRefreshToken);
-
-//     res.cookie('refreshToken', refreshToken, {
-//       httpOnly: true,
-//       expires: session.refreshTokenValidUntil,
-//     });
-
-//     res.status(200).json({
-//       status: 200,
-//       message: 'Successfully refreshed a session!',
-//       data: { accessToken },
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 
 export const refreshController = async (req, res, next) => {
   try {
@@ -125,9 +88,17 @@ export const refreshController = async (req, res, next) => {
 
 export const logoutController = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-    await logoutUser(refreshToken);
+    const { sessionId } = req.cookies;
+
+    if (!sessionId) {
+      throw createHttpError(401, 'No sessionId provided');
+    }
+
+    await logoutUser(sessionId);
+
+    res.clearCookie('sessionId');
     res.clearCookie('refreshToken');
+
     res.sendStatus(204);
   } catch (err) {
     next(err);
