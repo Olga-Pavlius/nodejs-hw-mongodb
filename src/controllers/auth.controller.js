@@ -1,3 +1,4 @@
+import createHttpError from 'http-errors';
 import {
   registerUser,
   loginUser,
@@ -37,18 +38,37 @@ export async function loginController(req, res) {
   });
 }
 
-export async function logoutController(req, res) {
-  const { sessionId } = req.cookies;
+// export async function logoutController(req, res) {
+//   const { sessionId } = req.cookies;
 
-  if (typeof sessionId === 'string') {
+//   if (typeof sessionId === 'string') {
+//     await logoutUser(sessionId);
+//   }
+
+//   res.clearCookie('sessionId');
+//   res.clearCookie('refreshToken');
+
+//   res.status(204).end();
+// }
+
+export const logoutController = async (req, res, next) => {
+  try {
+    const { sessionId } = req.cookies;
+
+    if (!sessionId) {
+      throw createHttpError(401, 'No sessionId provided');
+    }
+
     await logoutUser(sessionId);
+
+    res.clearCookie('sessionId');
+    res.clearCookie('refreshToken');
+
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
   }
-
-  res.clearCookie('sessionId');
-  res.clearCookie('refreshToken');
-
-  res.status(204).end();
-}
+};
 
 export async function refreshController(req, res) {
   const { sessionId, refreshToken } = req.cookies;
