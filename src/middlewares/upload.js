@@ -1,15 +1,21 @@
-import path from 'node:path';
-
 import multer from 'multer';
+import path from 'node:path';
+import fs from 'node:fs';
+import { nanoid } from 'nanoid';
+
+// Створення папки temp, якщо її не існує
+const tempDir = path.resolve('temp');
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.resolve('src', 'tmp'));
+  destination: (req, file, cb) => {
+    cb(null, tempDir);
   },
-  filename: function (req, file, cb) {
-    const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-
-    cb(null, uniquePrefix + '-' + file.originalname);
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${nanoid()}${ext}`);
   },
 });
 

@@ -1,5 +1,4 @@
 import createHttpError from 'http-errors';
-//import path from 'node:path';
 import * as fs from 'node:fs/promises';
 
 import {
@@ -70,9 +69,14 @@ async function createContactController(req, res, next) {
     let photo = null;
 
     if (req.file) {
-      const result = await uploadToCloudinary(req.file.path);
-      await fs.unlink(req.file.path);
-      photo = result.secure_url;
+      try {
+        const result = await uploadToCloudinary(req.file.path);
+        await fs.unlink(req.file.path).catch(() => {});
+        photo = result.secure_url;
+      } catch {
+        await fs.unlink(req.file.path).catch(() => {});
+        throw new createHttpError.InternalServerError('Failed to upload photo to Cloudinary');
+      }
     }
 
     const contact = await createContact({
@@ -87,44 +91,59 @@ async function createContactController(req, res, next) {
       data: contact,
     });
   } catch (error) {
-    console.error('Create contact error:', error);
+    console.error('🔴 Create contact error:', error);
     next(error);
   }
 }
 
-async function updateContactController(req, res) {
-  const contactId = req.params.id;
-
-  let photo = req.body.photo;
-  if (req.file) {
-    const result = await uploadToCloudinary(req.file.path);
-    await fs.unlink(req.file.path);
-    photo = result.secure_url;
-  }
-
-  const updated = await updateContact(contactId, { ...req.body, photo }, req.user.id);
-
-  if (!updated) {
-    throw new createHttpError.NotFound('Contact not found');
-  }
-
-  res.status(200).json({
-    status: 200,
-    message: 'Contact updated successfully',
-    data: updated,
-  });
-}
-
-export const replaceContactController = async (req, res, next) => {
+async function updateContactController(req, res, next) {
   try {
+    const contactId = req.params.id;
     let photo = req.body.photo;
+
     if (req.file) {
-      const result = await uploadToCloudinary(req.file.path);
-      await fs.unlink(req.file.path);
-      photo = result.secure_url;
+      try {
+        const result = await uploadToCloudinary(req.file.path);
+        await fs.unlink(req.file.path).catch(() => {});
+        photo = result.secure_url;
+      } catch {
+        await fs.unlink(req.file.path).catch(() => {});
+        throw new createHttpError.InternalServerError('Failed to upload photo to Cloudinary');
+      }
     }
 
+    const updated = await updateContact(contactId, { ...req.body, photo }, req.user.id);
+
+    if (!updated) {
+      throw new createHttpError.NotFound('Contact not found');
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Contact updated successfully',
+      data: updated,
+    });
+  } catch (error) {
+    console.error('🔴 Update contact error:', error);
+    next(error);
+  }
+}
+
+async function replaceContactController(req, res, next) {
+  try {
     const { id } = req.params;
+    let photo = req.body.photo;
+
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.path);
+        await fs.unlink(req.file.path).catch(() => {});
+        photo = result.secure_url;
+      } catch {
+        await fs.unlink(req.file.path).catch(() => {});
+        throw new createHttpError.InternalServerError('Failed to upload photo to Cloudinary');
+      }
+    }
 
     const updatedContact = await replaceContact(id, {
       ...req.body,
@@ -142,10 +161,10 @@ export const replaceContactController = async (req, res, next) => {
       data: updatedContact,
     });
   } catch (error) {
-    console.error('Replace contact error:', error);
+    console.error('🔴 Replace contact error:', error);
     next(error);
   }
-};
+}
 
 export {
   getContactsController,
@@ -153,4 +172,5 @@ export {
   deleteContactController,
   createContactController,
   updateContactController,
+  replaceContactController,
 };

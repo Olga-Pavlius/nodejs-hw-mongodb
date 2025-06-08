@@ -1,5 +1,7 @@
 import express from 'express';
 
+import { upload } from '../middlewares/upload.js';
+
 import {
   getContactsController,
   getContactByIdController,
@@ -29,25 +31,26 @@ router.delete('/:id', isValidID, ctrlWrapper(deleteContactController));
 
 router.post(
   '/',
-  jsonParser,
+  upload.single('photo'),
   validateBody(contactSchema),
-  ctrlWrapper(createContactController),
+  createContactController
 );
 
 router.patch(
   '/:id',
   isValidID,
   jsonParser,
+  upload.single('photo'),
   validateBody(updateContactSchema),
-  ctrlWrapper(updateContactController),
+  updateContactController
 );
 
 router.put(
   '/:id',
   isValidID,
-  jsonParser,
+  upload.single('photo'),
   validateBody(contactSchema),
-  ctrlWrapper(replaceContactController),
+  replaceContactController
 );
 
 export default router;
