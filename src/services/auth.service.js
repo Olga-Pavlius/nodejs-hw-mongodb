@@ -15,31 +15,27 @@ import { getEnvVar } from '../utils/getEnvVar.js';
 
 const RESET_PASSWORD_TEMPLATE = fs.readFileSync(
   path.resolve('src', 'templates', 'reset-password.hbs'),
-  'UTF-8',
+  'utf-8'
 );
 
 export async function registerUser(payload) {
-  const user = await User.findOne({ email: payload.email });
-
-  if (user !== null) {
+  const existingUser = await User.findOne({ email: payload.email });
+  if (existingUser) {
     throw new createHttpError.Conflict('Email is already in use');
   }
 
-  payload.password = await bcrypt.hash(payload.password, 10);
-
-  return User.create(payload);
+  const hashedPassword = await bcrypt.hash(payload.password, 10);
+  return User.create({ ...payload, password: hashedPassword });
 }
 
 export async function loginUser(email, password) {
   const user = await User.findOne({ email });
-
-  if (user === null) {
+  if (!user) {
     throw new createHttpError.Unauthorized('Email or password is incorrect');
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
-
-  if (isMatch !== true) {
+  if (!isMatch) {
     throw new createHttpError.Unauthorized('Email or password is incorrect');
   }
 
@@ -59,9 +55,8 @@ export async function logoutUser(sessionId) {
 }
 
 export async function refreshSession(sessionId, refreshToken) {
-  const session = await Session.findOne({ _id: sessionId });
-
-  if (session === null) {
+  const session = await Session.findById(sessionId);
+  if (!session) {
     throw new createHttpError.Unauthorized('Session not found');
   }
 
@@ -86,43 +81,34 @@ export async function refreshSession(sessionId, refreshToken) {
 
 export async function requestResetPassword(email) {
   const user = await User.findOne({ email });
-
-  if (user === null) {
+  if (!user) {
     throw new createHttpError.NotFound('User not found');
   }
 
   const token = jwt.sign(
-    {
-      sub: user._id,
-      name: user.name,
-    },
+    { sub: user._id, name: user.name },
     getEnvVar('JWT_SECRET'),
-    {
-      expiresIn: '15m',
-    },
+    { expiresIn: '15m' }
   );
 
   const template = Handlebars.compile(RESET_PASSWORD_TEMPLATE);
+  const html = template({
+    link: `${getEnvVar('FRONTEND_URL')}/reset-password?token=${token}`,
+    name: user.name,
+  });
 
-  await sendMail(
-    user.email,
-    'Reset password',
-    template({ link: `http://localhost:3000/reset-password/?token=${token}` }),
-  );
+  await sendMail(user.email, 'Reset your password', html);
 }
 
 export async function resetPassword(password, token) {
   try {
     const decoded = jwt.verify(token, getEnvVar('JWT_SECRET'));
-
     const user = await User.findById(decoded.sub);
-
-    if (user === null) {
+    if (!user) {
       throw new createHttpError.NotFound('User not found');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     await User.findByIdAndUpdate(user._id, { password: hashedPassword });
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

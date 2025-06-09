@@ -55,4 +55,18 @@ router.post(
   ctrlWrapper(resetPasswordController),
 );
 
+router.post(
+  '/reset-pwd/:userId/:token',
+  jsonParser,
+  validateBody(resetPasswordSchema),
+  ctrlWrapper(resetPasswordController),
+);
+
+router.post(
+  '/send-reset-email',
+  jsonParser,
+  validateBody(requestResetPasswordSchema),
+  ctrlWrapper(requestResetPasswordController),
+);
+
 export default router;
