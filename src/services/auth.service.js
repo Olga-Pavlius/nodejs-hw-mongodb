@@ -79,26 +79,60 @@ export async function refreshSession(sessionId, refreshToken) {
   });
 }
 
+// export async function requestResetPassword(email) {
+//   console.log(`Reset password token: ${token}`);
+//   const user = await User.findOne({ email });
+//   if (!user) {
+//     throw new createHttpError.NotFound('User not found');
+//   }
+
+//   const token = jwt.sign(
+//     { sub: user._id, name: user.name },
+//     getEnvVar('JWT_SECRET'),
+//     { expiresIn: '15m' }
+//   );
+
+//   const template = Handlebars.compile(RESET_PASSWORD_TEMPLATE);
+//   const html = template({
+//     link: `${getEnvVar('FRONTEND_URL')}/reset-password?token=${token}`,
+//     name: user.name,
+//   });
+
+//   await sendMail(user.email, 'Reset your password', html);
+// }
+
 export async function requestResetPassword(email) {
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw new createHttpError.NotFound('User not found');
+  try {
+    console.log('📧 Запит на reset-password для: ', email);
+
+    const user = await User.findOne({ email });
+    console.log('User found:', user ? user._id : null);
+
+    if (!user) throw new createHttpError.NotFound('User not found');
+
+    const token = jwt.sign(
+      { sub: user._id, name: user.name },
+      getEnvVar('JWT_SECRET'),
+      { expiresIn: '15m' },
+    );
+    console.log('Generated token:', token);
+
+    const template = Handlebars.compile(RESET_PASSWORD_TEMPLATE);
+    const html = template({
+      link: `${getEnvVar('FRONTEND_URL')}/reset-password?token=${token}`,
+      name: user.name,
+    });
+    console.log('Compiled HTML length:', html.length);
+
+    await sendMail(user.email, 'Reset your password', html);
+    console.log('✅ Email successfully sent');
+
+  } catch (err) {
+    console.error('❌ requestResetPassword ERROR:', err);
+    throw err;
   }
-
-  const token = jwt.sign(
-    { sub: user._id, name: user.name },
-    getEnvVar('JWT_SECRET'),
-    { expiresIn: '15m' }
-  );
-
-  const template = Handlebars.compile(RESET_PASSWORD_TEMPLATE);
-  const html = template({
-    link: `${getEnvVar('FRONTEND_URL')}/reset-password?token=${token}`,
-    name: user.name,
-  });
-
-  await sendMail(user.email, 'Reset your password', html);
 }
+
 
 export async function resetPassword(password, token) {
   try {

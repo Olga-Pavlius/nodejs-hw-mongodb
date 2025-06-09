@@ -1,10 +1,10 @@
 import nodemailer from 'nodemailer';
-
 import { getEnvVar } from './getEnvVar.js';
+import createHttpError from 'http-errors';
 
 const transport = nodemailer.createTransport({
   host: getEnvVar('SMTP_HOST'),
-  port: getEnvVar('SMTP_PORT'),
+  port: Number(getEnvVar('SMTP_PORT')),
   secure: false,
   auth: {
     user: getEnvVar('SMTP_USER'),
@@ -12,11 +12,13 @@ const transport = nodemailer.createTransport({
   },
 });
 
-export function sendMail(to, subject, html) {
-  return transport.sendMail({
-    from: getEnvVar('EMAIL_FROM'),
-    to,
-    subject,
-    html,
-  });
+export async function sendMail(to, subject, html) {
+  try {
+    const from = getEnvVar('EMAIL_FROM');
+    await transport.sendMail({ from, to, subject, html });
+    console.log(`Email sent to ${to}`);
+  } catch (err) {
+     console.error('Error sending email:', err);
+    throw createHttpError(500, 'Failed to send email');
+  }
 }
