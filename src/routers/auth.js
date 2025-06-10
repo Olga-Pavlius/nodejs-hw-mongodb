@@ -68,5 +68,9 @@ router.post(
   validateBody(requestResetPasswordSchema),
   ctrlWrapper(requestResetPasswordController),
 );
+// router.post('/send-reset-email', async (req, res) => {
+//   console.log('🔥 Роут активний!');
+//   res.send('OK');
+// });
 
 export default router;

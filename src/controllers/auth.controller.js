@@ -96,6 +96,7 @@ export const refreshController = async (req, res, next) => {
 };
 
 export const requestResetPasswordController = async (req, res, next) => {
+  console.log('🔔 requestResetPasswordController body:', req.body);
   try {
     const { email } = req.body;
     await requestResetPassword(email);
