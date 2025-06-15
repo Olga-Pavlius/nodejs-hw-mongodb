@@ -1,0 +1,41 @@
+post:
+  tags:
+    - Auth
+  summary: Refresh access token
+  operationId: refreshToken
+  description: Updates the access token using a valid refresh token.
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: The token has been updated successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - accessToken
+              - refreshToken
+            properties:
+              accessToken:
+                type: string
+                example: newAccessToken123
+              refreshToken:
+                type: string
+                example: newRefreshToken123
+    '401':
+      description: Invalid or expired refresh token
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+              - message
+            properties:
+              status:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: Unauthorized

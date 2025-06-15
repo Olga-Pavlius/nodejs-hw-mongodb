@@ -1,0 +1,63 @@
+post:
+  tags:
+    - Auth
+  summary: Register user
+  operationId: registerUser
+  description: Registers a new user in the system.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - name
+            - email
+            - password
+          properties:
+            name:
+              type: string
+              example: Olya
+            email:
+              type: string
+              format: email
+              example: olya@example.com
+            password:
+              type: string
+              format: password
+              example: MyStrongPassword123
+  responses:
+    '201':
+      description: Created user
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+              - message
+              - data
+            properties:
+              status:
+                type: integer
+                example: 201
+              message:
+                type: string
+                example: User created successfully
+              data:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    example: 64e54c5a4eac4b0012a5a123
+                  name:
+                    type: string
+                    example: Olya
+                  email:
+                    type: string
+                    format: email
+                    example: olya@example.com
+    '400':
+      description: Invalid input data
+    '500':
+      description: Internal server error

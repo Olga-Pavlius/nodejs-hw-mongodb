@@ -6,7 +6,10 @@ import {
   refreshSession,
   requestResetPassword,
   resetPassword,
+  loginOrRegister,
 } from '../services/auth.service.js';
+
+import {getOAuthURL, validateCode} from '../utils/googleOAuth.js';
 
 export const registerController = async (req, res, next) => {
   try {
@@ -124,4 +127,38 @@ export const resetPasswordController = async (req, res, next) => {
     next(error);
   }
 };
+
+export function getOAuthController(req, res) {
+  const url = getOAuthURL;
+  res.json({
+     status: 200,
+     message: "Successfully get OAuth url",
+     data: {
+      oauth_url: url,
+     }
+  });
+};
+
+export async function confirmOAuthController(req, res) {
+  const ticket = await validateCode(req.body.code);
+  const session = await loginOrRegister(ticket.getPayload.email, ticket.getPayload.name);
+
+   res.cookie('sessionId', session._id, {
+      httpOnly: true,
+      expire: session.refreshTokenValidUntil,
+    });
+
+    res.cookie('refreshToken', session.refreshToken, {
+      httpOnly: true,
+      expire: session.refreshTokenValidUntil,
+    });
+
+    res.json({
+      status: 200,
+      message: "Login with Google successfully",
+      data:{
+        accessToken: session.accessToken,
+      },
+    });
+}
 

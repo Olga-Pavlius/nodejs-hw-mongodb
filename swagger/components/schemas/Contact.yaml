@@ -1,0 +1,52 @@
+type: object
+required:
+  - name
+  - phoneNumber
+  - email
+  - userId
+  - creaatedAt
+  - updatedAt
+properties:
+  name:
+    type: string
+    description: name
+    example: Olya
+  phoneNumber:
+    type: string
+    description: number
+    example: "+380991234567"
+  email:
+    type: string
+    description: Email
+    format: email
+    example: olya@example.com
+  isFavourite:
+    type: boolean
+    description: my favourite
+    example: true
+    default: false
+  contactType:
+    type: string
+    description: type of contact
+    enum: ["work", "home", "personal"]
+    example: personale
+    default: personal
+  userId:
+    type: string
+    format: uuid
+    description: Contact user id
+    example: 64e54c5a4eac4b0012a5a123
+  photo:
+    type: string
+    description: Contaact photo URL
+    example: https://example.com/photo.jpg
+  creaatedAt:
+    type: string
+    format: date-time
+    description: Contact created at
+    example: 2025-03-27T19:43:21.686+00:00
+  updatedAt:
+    type: string
+    format: date-time
+    description: Contact updated at
+    example: 2025-03-28T19:43:21.686+00:00
