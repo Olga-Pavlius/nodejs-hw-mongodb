@@ -18,7 +18,10 @@ export const setupServer = () => {
   const swaggerDocument = JSON.parse(
     fs.readFileSync(path.resolve('docs', 'swagger.json'), 'utf-8')
   );
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+  if (process.env.NODE_ENV === 'development') {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  }
 
   app.get(
     '/redoc',
@@ -30,12 +33,7 @@ export const setupServer = () => {
 
   app.use('/docs', express.static('docs'));
 
-  app.use(
-    express.json({
-      type: ['application/json', 'application/vnd.api+json'],
-      limit: '100kb',
-    })
-  );
+  app.use(express.json());
 
   app.use(cors());
 
