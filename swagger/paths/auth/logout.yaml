@@ -1,12 +1,12 @@
 post:
-  tags:
+ tags:
     - Auth
-  summary: User logout
-  operationId: logoutUser
-  description: Ends the user's session and invalidates tokens.
-  security:
+ summary: User logout
+ operationId: logoutUser
+ description: Ends the user's session and invalidates tokens.
+ security:
     - bearerAuth: []
-  responses:
+ responses:
     '204':
       description: Session ended successfully
     '401':

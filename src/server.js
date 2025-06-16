@@ -3,6 +3,9 @@ import cors from 'cors';
 import pino from 'pino-http';
 import cookieParser from 'cookie-parser';
 import redoc from 'redoc-express';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
 
 import contactsRoutes from './routers/contacts.routers.js';
 import authRouter from './routers/auth.js';
@@ -12,16 +15,19 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 export const setupServer = () => {
   const app = express();
 
-  // Redoc UI для документації
+  const swaggerDocument = JSON.parse(
+    fs.readFileSync(path.resolve('docs', 'swagger.json'), 'utf-8')
+  );
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
   app.get(
-    '/api-docs',
+    '/redoc',
     redoc({
       title: 'Contacts API Docs',
       specUrl: '/docs/openapi.yaml',
     })
   );
 
-  // Віддаємо файл документації
   app.use('/docs', express.static('docs'));
 
   app.use(
