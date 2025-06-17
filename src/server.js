@@ -15,11 +15,16 @@ import { notFoundHandler } from './middlewares/notFoundHandler.js';
 export const setupServer = () => {
   const app = express();
 
-  const swaggerDocument = JSON.parse(
-    fs.readFileSync(path.resolve('docs', 'swagger.json'), 'utf-8')
-  );
+  let swaggerDocument;
+  try {
+    swaggerDocument = JSON.parse(
+      fs.readFileSync(path.resolve('docs', 'swagger.json'), 'utf-8')
+    );
+  } catch (err) {
+    console.error('❌ Swagger JSON not found or invalid:', err.message);
+  }
 
-  if (process.env.NODE_ENV === 'development') {
+  if (swaggerDocument) {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   }
 
@@ -34,9 +39,8 @@ export const setupServer = () => {
   app.use('/docs', express.static('docs'));
 
   app.use(express.json());
-
   app.use(cors());
-
+  app.use(cookieParser());
   app.use(
     pino({
       transport: {
@@ -45,12 +49,8 @@ export const setupServer = () => {
     })
   );
 
-  app.use(cookieParser());
-
   app.get('/', (req, res) => {
-    res.json({
-      message: 'Hello World!',
-    });
+    res.json({ message: 'Hello World!' });
   });
 
   app.use('/contacts', contactsRoutes);
