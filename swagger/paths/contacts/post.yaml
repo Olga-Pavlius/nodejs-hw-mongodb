@@ -16,7 +16,6 @@ post:
             - name
             - phoneNumber
             - contactType
-            - userId
           properties:
             name:
               type: string
@@ -42,11 +41,6 @@ post:
               enum: [work, home, personal]
               example: home
               default: personal
-            userId:
-              type: string
-              format: uuid
-              description: ID of the user who owns the contact
-              example: 64e54c5a4eac4b0012a5a123
             photo:
               type: string
               format: binary

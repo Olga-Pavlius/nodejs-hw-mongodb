@@ -74,8 +74,7 @@
                   "required": [
                     "name",
                     "phoneNumber",
-                    "contactType",
-                    "userId"
+                    "contactType"
                   ],
                   "properties": {
                     "name": {
@@ -110,12 +109,6 @@
                       ],
                       "example": "home",
                       "default": "personal"
-                    },
-                    "userId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "description": "ID of the user who owns the contact",
-                      "example": "64e54c5a4eac4b0012a5a123"
                     },
                     "photo": {
                       "type": "string",
@@ -293,9 +286,36 @@
           "requestBody": {
             "required": true,
             "content": {
-              "application/json": {
+              "multipart/form-data": {
                 "schema": {
-                  "$ref": "../../components/schemas/Contact.yaml"
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "phoneNumber": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "isFavourite": {
+                      "type": "boolean"
+                    },
+                    "contactType": {
+                      "type": "string",
+                      "enum": [
+                        "work",
+                        "home",
+                        "personal"
+                      ]
+                    },
+                    "photo": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
                 }
               }
             }
@@ -322,7 +342,7 @@
                         "example": "Contact updated successfully"
                       },
                       "data": {
-                        "$ref": "../../components/schemas/Contact.yaml"
+                        "$ref": "../../components/schemas/contact.yaml"
                       }
                     }
                   }

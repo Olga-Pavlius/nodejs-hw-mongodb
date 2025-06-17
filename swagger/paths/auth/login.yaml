@@ -22,7 +22,7 @@ post:
               type: string
               format: password
               example: MyStrongPassword123
- responses:
+  responses:
     '200':
       description: Successful login
       content:
