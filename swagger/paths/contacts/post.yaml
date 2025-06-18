@@ -69,16 +69,14 @@
 #       $ref: ../../../components/responses/401.yaml
 #     '500':
 #       $ref: ../../../components/responses/500.yaml
-
-post:
-  tags:
+tags:
     - Contacts
-  summary: Create contact
-  operationId: createContact
-  description: Create a new contact in the address book
-  security:
+summary: Create contact
+operationId: createContact
+description: Create a new contact in the address book
+security:
     - bearerAuth: []
-  requestBody:
+requestBody:
     required: true
     content:
       multipart/form-data:
@@ -120,7 +118,7 @@ post:
               type: string
               format: binary
               description: Optional photo file
-  responses:
+responses:
     '201':
       description: Contact created successfully
       content:
@@ -139,8 +137,8 @@ post:
                 type: string
                 example: Contact created successfully
               data:
-                $ref: '../../../components/schemas/contact.yaml'
+                $ref: '../../components/schemas/contact.yaml'
     '401':
-      $ref: '../../../components/responses/401.yaml'
+      $ref: '../../components/responses/401.yaml'
     '500':
-      $ref: '../../../components/responses/500.yaml'
+      $ref: ../../components/responses/500.yaml

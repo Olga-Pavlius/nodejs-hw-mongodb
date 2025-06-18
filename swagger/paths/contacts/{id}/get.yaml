@@ -1,12 +1,11 @@
-get:
-  tags:
+tags:
     - Contacts
-  summary: Get contact by ID
-  operationId: getContact
-  description: Get contact by its unique identifier
-  security:
+summary: Get contact by ID
+operationId: getContact
+description: Get contact by its unique identifier
+security:
     - bearerAuth: []
-  parameters:
+parameters:
     - in: path
       name: id
       required: true
@@ -14,7 +13,7 @@ get:
       schema:
         type: string
         example: 507f1f77bcf86cd799439011
-  responses:
+responses:
     '200':
       description: Successfully retrieved contact
       content:
@@ -33,9 +32,9 @@ get:
                 type: string
                 example: Successfully get contact
               data:
-                $ref: ../../../../components/schemas/contact.yaml
+                $ref: ../../../components/schemas/contact.yaml
     '401':
-      $ref: ../../../../components/responses/401.yaml
+      $ref: ../../../components/responses/401.yaml
     '404':
       description: Contact not found
       content:
@@ -53,4 +52,4 @@ get:
                 type: string
                 example: Contact not found
     '500':
-      $ref: ../../../../components/responses/500.yaml
+      $ref: ../../../components/responses/500.yaml

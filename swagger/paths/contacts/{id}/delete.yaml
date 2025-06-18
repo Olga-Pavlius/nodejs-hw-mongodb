@@ -1,12 +1,11 @@
-delete:
-  tags:
+tags:
     - Contacts
-  summary: Delete contact by ID
-  operationId: deleteContact
-  description: Delete contact by its unique identifier.
-  security:
+summary: Delete contact by ID
+operationId: deleteContact
+description: Delete contact by its unique identifier.
+security:
     - bearerAuth: []
-  parameters:
+parameters:
     - name: id
       in: path
       required: true
@@ -14,7 +13,7 @@ delete:
       schema:
         type: string
         example: 507f1f77bcf86cd799439011
-  responses:
+responses:
     '200':
       description: Contact deleted successfully
       content:
@@ -32,7 +31,7 @@ delete:
                 type: string
                 example: Contact deleted successfully
     '401':
-      $ref: '../../components/responses/401.yaml'
+      $ref: '../../../components/responses/401.yaml'
     '404':
       description: Contact not found
       content:
@@ -50,4 +49,4 @@ delete:
                 type: string
                 example: Contact not found
     '500':
-      $ref: '../../components/responses/500.yaml'
+      $ref: '../../../components/responses/500.yaml'

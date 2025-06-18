@@ -1,12 +1,12 @@
-post:
-  tags:
+
+tags:
     - Auth
-  summary: Refresh access token
-  operationId: refreshToken
-  description: Updates the access token using a valid refresh token.
-  security:
+summary: Refresh access token
+operationId: refreshToken
+description: Updates the access token using a valid refresh token.
+security:
     - bearerAuth: []
-  responses:
+responses:
     '200':
       description: The token has been updated successfully
       content:

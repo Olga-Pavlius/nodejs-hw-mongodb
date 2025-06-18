@@ -1,12 +1,11 @@
-get:
-  tags:
+tags:
     - Contacts
-  summary: Get all contacts
-  operationId: getContacts
-  description: Returns a list of contacts
-  security:
+summary: Get all contacts
+operationId: getContacts
+description: Returns a list of contacts
+security:
     - bearerAuth: []
-  responses:
+responses:
     '200':
       description: List of contacts
     '401':
