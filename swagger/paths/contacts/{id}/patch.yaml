@@ -15,7 +15,7 @@ patch:
         type: string
         example: 507f1f77bcf86cd799439011
   requestBody:
-    required: true
+    # required: true
     content:
       multipart/form-data:
         schema:
