@@ -160,17 +160,6 @@
       }
     },
     "/contacts/{id}": {
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "example": "507f1f77bcf86cd799439011"
-          }
-        }
-      ],
       "get": {
         "get": {
           "tags": [
