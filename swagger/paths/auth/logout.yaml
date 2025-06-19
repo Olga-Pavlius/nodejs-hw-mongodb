@@ -10,18 +10,4 @@ responses:
     '204':
       description: Session ended successfully
     '401':
-      description: User is not authorized
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - status
-              - message
-            properties:
-              status:
-                type: integer
-                example: 401
-              message:
-                type: string
-                example: Unauthorized access
+      $ref: '../../components/responses/401.yaml'

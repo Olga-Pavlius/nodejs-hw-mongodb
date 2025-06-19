@@ -52,18 +52,4 @@ responses:
                   type: string
                   example: your-refresh-token
   '401':
-    description: Incorrect email or password
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - status
-            - message
-          properties:
-            status:
-              type: integer
-              example: 401
-            message:
-              type: string
-              example: Incorrect email or password
+    $ref: '../../components/responses/401.yaml'

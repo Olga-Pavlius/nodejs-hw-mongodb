@@ -24,18 +24,4 @@ responses:
                 type: string
                 example: newRefreshToken123
     '401':
-      description: Invalid or expired refresh token
-      content:
-        application/json:
-          schema:
-            type: object
-            required:
-              - status
-              - message
-            properties:
-              status:
-                type: integer
-                example: 401
-              message:
-                type: string
-                example: Unauthorized
+      $ref: '../../components/responses/401.yaml'
